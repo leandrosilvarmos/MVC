@@ -4,13 +4,21 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class clientes extends Model
+class Clientes extends Model
 {
     //
 
     protected $fillable = [
-        'id', 'nome', 'email' , 'telefone' , 'idade'
+            'id' ,
+            'nome' ,
+            'endereco' ,
+            'email' ,
+            'telefone'
     ];
 
-    protected $table = 'clientes';
+    protected $table = 'Clientes';
+
+    public function vendas(){
+        return $this->hasMany(Vendas::class ,'cliente_id');
+    }
 }
