@@ -19,7 +19,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         //
-        $data = User::ordeyBy('id' , 'DESC')->paginate(5);
+        $data = User::orderBy('id' , 'DESC')->paginate(5);
         return view( 'users.index' , compact('data'))->with('i' , ($request->input ('page' , 1) - 1 ) *5);
     }
 
@@ -31,6 +31,7 @@ class UserController extends Controller
     public function create()
     {
         //
+
     }
 
     /**
@@ -53,6 +54,9 @@ class UserController extends Controller
     public function show($id)
     {
         //
+            $User = User::find($id);
+            return view('user.show', compact('user'));
+
     }
 
     /**
@@ -64,6 +68,10 @@ class UserController extends Controller
     public function edit($id)
     {
         //
+        $User = User::find($id);
+        $roles = Role::pluck('name' , 'name')->all();
+        $userRole = $User->roles->pluck('name' , 'name')->all();
+        return view('users.edit' , compact ('user' , 'roles' , 'userRole'));
     }
 
     /**
@@ -76,6 +84,28 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         //
+
+        $this->validate($request,[
+                    'name' => 'required' ,
+                    'email' => 'required|email|unique:users,email,'.$id ,
+                    'password' => 'same:confirm=password',
+                    'roles' => 'required' , ]);
+
+                    $input = $request->all();
+
+            if(!empty($input['password'])){
+
+                $input['password'] = Hash::make($input['password']);
+            }else{
+                $input = Arr::except($input, array('password'));
+            }
+
+
+                $user = User::find($id);
+                $user->update($input);
+                DB::table('model_has_roles')->where('model_id' , $id)->delete();
+                $user->assingRole($request->input('roles'));
+                return redirect()->route('users.index')->with('sucess' , 'Usuario editado com sucesso');
     }
 
     /**
@@ -87,5 +117,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         //
+        User::find($id)->delete();
+        return redirect()->Route::view('users.index')->with('sucess' , 'Usuario exluido com sucesso');
     }
 }
