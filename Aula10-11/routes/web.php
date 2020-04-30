@@ -20,7 +20,9 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::resource('users', 'UserController');
 
 Route::group(['prefix' => 'clientes'], function () {
     Route::get('/listar', 'ClientesController@lista')->middleware('auth');
+
 });
